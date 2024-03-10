@@ -28,7 +28,7 @@ def embed_youtube_video(url):
     return html_code
 
 def main():
-    st.title("YouTube Video Downloader and Viewer")
+    st.title("YouTube Video Downloader and Viewer by Muneeb")
 
     # Input for YouTube video URL
     url = st.text_input("Enter YouTube video URL:")
