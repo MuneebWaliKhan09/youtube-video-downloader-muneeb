@@ -1,5 +1,11 @@
 import streamlit as st
 from pytube import YouTube
+import os
+
+def sanitize_filename(title):
+    # Remove invalid characters from the title
+    invalid_chars = set(r'\/:*?"<>|')
+    return ''.join(char if char not in invalid_chars else '_' for char in title)
 
 def download_youtube_video(url, resolution='720p'):
     try:
@@ -15,10 +21,15 @@ def download_youtube_video(url, resolution='720p'):
         if stream is None:
             return False, f"No {resolution} stream found for the video."
 
-        # Download the video
-        stream.download()
+        # Sanitize the video title for a valid filename
+        filename = sanitize_filename(video.title) + ".mp4"
 
-        return True, f"Download successful! Video saved as {video.title}.mp4"
+        # Download the video directly to the user's DOWNLOADS folder
+        downloads_path = os.path.expanduser("~/Downloads")
+        filepath = os.path.join(downloads_path, filename)
+        stream.download(filepath)
+
+        return True, filename
     except Exception as e:
         return False, f"Error: {str(e)}"
 
@@ -49,15 +60,16 @@ def main():
 
             # Download button
             if st.button("Download"):
-                success, message = download_youtube_video(url, resolution)
+                success, filename = download_youtube_video(url, resolution)
                 if success:
-                    st.success(message)
+                    st.success("Download successful!")
+                    # Provide a download link
+                    st.markdown(f"Please Check the Downloads TAB on your PC({filename})", unsafe_allow_html=True)
                 else:
-                    st.error(message)
+                    st.error(filename)
 
         except Exception as e:
             st.error(f"Error loading video: {str(e)}")
 
 if __name__ == "__main__":
     main()
-
